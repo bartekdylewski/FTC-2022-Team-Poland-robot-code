@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -50,31 +50,40 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Linear OpMode", group="Linear Opmode")
-@Disabled
-public class BasicOpMode_Linear extends LinearOpMode {
+@TeleOp(name="TeleOp 4x4", group="Linear Opmode")
+// @Disabled
+public class TeleOp_4x4 extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftDrive = null;
-    private DcMotor rightDrive = null;
+    ElapsedTime runtime = new ElapsedTime();
+    DcMotor leftDriveFront;
+    DcMotor leftDriveRear;
+    DcMotor rightDriveFront;
+    DcMotor rightDriveRear;
+
+    DcMotor elevatorFold;
+    DcMotor elevatorUnfold;
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-        leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        leftDriveFront  = hardwareMap.get(DcMotor.class, "leftDriveFront");
+        leftDriveRear  = hardwareMap.get(DcMotor.class, "leftDriveRear");
+        rightDriveFront = hardwareMap.get(DcMotor.class, "rightDriveFront");
+        rightDriveRear = hardwareMap.get(DcMotor.class, "rightDriveRear");
+
+        elevatorFold = hardwareMap.get(DcMotor.class, "elevatorFold");
+        elevatorUnfold = hardwareMap.get(DcMotor.class, "elevatorUnfold");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        leftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftDriveFront.setDirection(DcMotor.Direction.REVERSE);
+        leftDriveRear.setDirection(DcMotor.Direction.REVERSE);
+        rightDriveFront.setDirection(DcMotor.Direction.FORWARD);
+        rightDriveRear.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -87,6 +96,9 @@ public class BasicOpMode_Linear extends LinearOpMode {
             double leftPower;
             double rightPower;
 
+            double foldPower;
+            double unfoldPower;
+
             // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
@@ -97,18 +109,24 @@ public class BasicOpMode_Linear extends LinearOpMode {
             leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
-            // Tank Mode uses one stick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
+            double fold = gamepad1.left_trigger;
+            double unfold = gamepad1.right_trigger;
+            foldPower = Range.clip(fold, -0.2, 0.2);
+            unfoldPower = Range.clip(fold, -0.2, 0.2);
 
-            // Send calculated power to wheels
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
+            // Send calculated power to wheels and motors
+            leftDriveFront.setPower(leftPower);
+            leftDriveRear.setPower(leftPower);
+            rightDriveFront.setPower(rightPower);
+            rightDriveRear.setPower(rightPower);
+
+            elevatorFold.setPower(foldPower);
+            elevatorUnfold.setPower(unfoldPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("Motors", "fold (%.2f), right (%.2f)", foldPower, unfoldPower);
             telemetry.update();
         }
     }
