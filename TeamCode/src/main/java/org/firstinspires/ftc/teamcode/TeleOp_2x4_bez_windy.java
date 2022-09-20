@@ -1,3 +1,5 @@
+// KOD DO ROBOTA STAREGO (BEZ OBSLUGI WINDY)
+
 /* Copyright (c) 2017 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -49,17 +51,19 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="TeleOp 2x4", group="Linear Opmode")
+// KOD DO ROBOTA STAREGO (BEZ OBSLUGI WINDY)
+
+@TeleOp(name="TeleOp 2x4 bez windy", group="Linear Opmode")
 // @Disabled
-public class TeleOp_2x4 extends LinearOpMode {
+public class TeleOp_2x4_bez_windy extends LinearOpMode {
 
     // Declare OpMode members.
     ElapsedTime runtime = new ElapsedTime();
     DcMotor leftDrive;
     DcMotor rightDrive;
 
-    DcMotor elevatorFold;
-    DcMotor elevatorUnfold;
+    //DcMotor elevatorFold;
+    //DcMotor elevatorUnfold;
 
     @Override
     public void runOpMode() {
@@ -69,8 +73,8 @@ public class TeleOp_2x4 extends LinearOpMode {
         leftDrive  = hardwareMap.get(DcMotor.class, "leftDriveFront");
         rightDrive = hardwareMap.get(DcMotor.class, "rightDriveFront");
 
-        elevatorFold = hardwareMap.get(DcMotor.class, "elevatorFold");
-        elevatorUnfold = hardwareMap.get(DcMotor.class, "elevatorUnfold");
+        //elevatorFold = hardwareMap.get(DcMotor.class, "elevatorFold");
+        //elevatorUnfold = hardwareMap.get(DcMotor.class, "elevatorUnfold");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -102,22 +106,22 @@ public class TeleOp_2x4 extends LinearOpMode {
             leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
-            double fold = gamepad1.left_trigger;
-            double unfold = gamepad1.right_trigger;
-            foldPower = Range.clip(fold, -0.2, 0.2);
-            unfoldPower = Range.clip(fold, -0.2, 0.2);
+            //double fold = gamepad1.left_trigger;
+            //double unfold = gamepad1.right_trigger;
+            //foldPower = Range.clip(fold, -0.2, 0.2);
+            //unfoldPower = Range.clip(fold, -0.2, 0.2);
 
             // Send calculated power to wheels and motors
-            leftDrive.setPower(leftPower);
-            rightDrive.setPower(rightPower);
+            //leftDrive.setPower(leftPower);
+            //rightDrive.setPower(rightPower);
 
-            elevatorFold.setPower(foldPower);
-            elevatorUnfold.setPower(unfoldPower);
+            //elevatorFold.setPower(foldPower);
+            //elevatorUnfold.setPower(unfoldPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.addData("Motors", "fold (%.2f), right (%.2f)", foldPower, unfoldPower);
+            //telemetry.addData("Motors", "fold (%.2f), right (%.2f)", foldPower, unfoldPower);
             telemetry.update();
         }
     }
