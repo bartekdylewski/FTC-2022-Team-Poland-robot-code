@@ -56,10 +56,10 @@ public class TeleOp_4x4_bez_windy extends LinearOpMode {
 
     // Declare OpMode members.
     ElapsedTime runtime = new ElapsedTime();
-    DcMotor leftDriveFront;
-    DcMotor leftDriveRear;
-    DcMotor rightDriveFront;
-    DcMotor rightDriveRear;
+    DcMotor leftDriveFront;     // port 0
+    DcMotor leftDriveRear;      // port 1
+    DcMotor rightDriveFront;    // port 2
+    DcMotor rightDriveRear;     // port 3
 
     //DcMotor elevatorFold;
     //DcMotor elevatorUnfold;

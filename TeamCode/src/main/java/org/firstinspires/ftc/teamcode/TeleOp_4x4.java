@@ -31,42 +31,32 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
 
 @TeleOp(name="TeleOp 4x4", group="Linear Opmode")
 // @Disabled
 public class TeleOp_4x4 extends LinearOpMode {
 
-    // Declare OpMode members.
+    // Declare OpMode members
     ElapsedTime runtime = new ElapsedTime();
-    DcMotor leftDriveFront;
-    DcMotor leftDriveRear;
-    DcMotor rightDriveFront;
-    DcMotor rightDriveRear;
+    DcMotor leftDriveFront;     // port 0
+    DcMotor leftDriveRear;      // port 1
+    DcMotor rightDriveFront;    // port 2
+    DcMotor rightDriveRear;     // port 3
 
-    DcMotor elevatorFold;
-    DcMotor elevatorUnfold;
+    DcMotor elevatorMotor1;     // port 0 expansion
+    DcMotor elevatorMotor2;     // port 1 expansion
+
+    // Constants
+    public double ELEVATOR_MOTOR1_POWER = 0.2;
+    public double ELEVATOR_MOTOR2_POWER = 0.2;
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status)", "Robot dziala :)");
         telemetry.update();
 
         leftDriveFront  = hardwareMap.get(DcMotor.class, "leftDriveFront");
@@ -74,59 +64,116 @@ public class TeleOp_4x4 extends LinearOpMode {
         rightDriveFront = hardwareMap.get(DcMotor.class, "rightDriveFront");
         rightDriveRear = hardwareMap.get(DcMotor.class, "rightDriveRear");
 
-        elevatorFold = hardwareMap.get(DcMotor.class, "elevatorFold");
-        elevatorUnfold = hardwareMap.get(DcMotor.class, "elevatorUnfold");
+        elevatorMotor1 = hardwareMap.get(DcMotor.class, "elevatorMotor1");
+        elevatorMotor2 = hardwareMap.get(DcMotor.class, "elevatorMotor2");
 
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        // Inverting direction of drivetrain motors to go forward for >0 input
         leftDriveFront.setDirection(DcMotor.Direction.REVERSE);
         leftDriveRear.setDirection(DcMotor.Direction.REVERSE);
         rightDriveFront.setDirection(DcMotor.Direction.FORWARD);
         rightDriveRear.setDirection(DcMotor.Direction.FORWARD);
 
+        // Changes motor's behavior after setting power to 0.0
+        // FLOAT = no resistance
+        // BRAKE = resistance
+        elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        // run until the end of the match (driver presses STOP)
+        // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            // Setup a variable for each drive wheel to save power level for telemetry
+            // Setup a variable for each motor to save power level for telemetry and setting motor power
             double leftPower;
             double rightPower;
+            double elevator1Power = 0;
+            double elevator2Power = 0;
 
-            double foldPower;
-            double unfoldPower;
-
-            // Choose to drive using either Tank Mode, or POV Mode
-            // Comment out the method that's not used.  The default below is POV.
-
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
+            // DRIVETRAIN
             double drive = -gamepad1.left_stick_y;
             double turn  =  gamepad1.right_stick_x;
             leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
             rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
-            double fold = gamepad1.left_trigger;
-            double unfold = gamepad1.right_trigger;
-            foldPower = Range.clip(fold, -0.2, 0.2);
-            unfoldPower = Range.clip(fold, -0.2, 0.2);
+            // ELEVATOR
+            // x - winda dol                      g1               ^
+            // o - winda gora                     g1             []  O
+            // kwadrat - podciaganie dol          g2               X
+            // trojkat - podciaganie gora         g2
 
-            // Send calculated power to wheels and motors
+
+            // Makes motors have no resistance after clicking right bumper
+            if(gamepad1.right_bumper) {
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            } else {
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+
+
+            // No button pressed => all 0, all BRAKE
+            if(!(gamepad1.cross && gamepad1.circle && gamepad1.square && gamepad1.triangle)) {
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                elevator1Power = 0;
+                elevator2Power = 0;
+            }
+
+
+            // No g1 button pressed => set g1 to 0
+            if(!(gamepad1.cross && gamepad1.circle)) {
+                elevator1Power = 0;
+            }
+            // No g2 button pressed => set g2 to 0
+            if(!(gamepad1.square && gamepad1.triangle)) {
+                elevator2Power = 0;
+            }
+
+
+            // Any g1 button pressed => set g2 to 0 and FLOAT
+            if(gamepad1.cross || gamepad1.circle) {
+                elevator2Power = 0;
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            }
+            // Any g2 button pressed => set g1 to 0 and FLOAT
+            if(gamepad1.square || gamepad1.triangle) {
+                elevator1Power = 0;
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            }
+
+
+            // Set power if button is pressed
+            if(gamepad1.cross) {
+                elevator1Power = ELEVATOR_MOTOR1_POWER;
+            }
+            if(gamepad1.circle) {
+                elevator1Power -= ELEVATOR_MOTOR1_POWER;
+            }
+            if(gamepad1.square) {
+                elevator2Power = ELEVATOR_MOTOR2_POWER;
+            }
+            if(gamepad1.triangle) {
+                elevator2Power -= ELEVATOR_MOTOR2_POWER;
+            }
+
+
+            // Send calculated power to motors
             leftDriveFront.setPower(leftPower);
             leftDriveRear.setPower(leftPower);
             rightDriveFront.setPower(rightPower);
             rightDriveRear.setPower(rightPower);
 
-            elevatorFold.setPower(foldPower);
-            elevatorUnfold.setPower(unfoldPower);
+            elevatorMotor1.setPower(elevator1Power);
+            elevatorMotor2.setPower(elevator2Power);
 
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            // Add data to telemetry (runtime, motors powers)
+            telemetry.addData("Status","Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.addData("Motors", "fold (%.2f), right (%.2f)", foldPower, unfoldPower);
+            telemetry.addData("Motors", "Elevator Motor 1 (%.2f), Elevator Motor 2 (%.2f)", elevator1Power, elevator2Power);
             telemetry.update();
         }
     }
