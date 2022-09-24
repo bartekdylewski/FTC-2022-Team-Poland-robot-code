@@ -104,17 +104,6 @@ public class TeleOp_4x4 extends LinearOpMode {
             // kwadrat - podciaganie dol          g2               X
             // trojkat - podciaganie gora         g2
 
-
-            // Makes motors have no resistance after clicking right bumper
-            if(gamepad1.right_bumper) {
-                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            } else {
-                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-
-
             // No button pressed => all 0, all BRAKE
             if(!(gamepad1.cross && gamepad1.circle && gamepad1.square && gamepad1.triangle)) {
                 elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -122,7 +111,6 @@ public class TeleOp_4x4 extends LinearOpMode {
                 elevator1Power = 0;
                 elevator2Power = 0;
             }
-
 
             // No g1 button pressed => set g1 to 0
             if(!(gamepad1.cross && gamepad1.circle)) {
@@ -132,7 +120,6 @@ public class TeleOp_4x4 extends LinearOpMode {
             if(!(gamepad1.square && gamepad1.triangle)) {
                 elevator2Power = 0;
             }
-
 
             // Any g1 button pressed => set g2 to 0 and FLOAT
             if(gamepad1.cross || gamepad1.circle) {
@@ -144,7 +131,6 @@ public class TeleOp_4x4 extends LinearOpMode {
                 elevator1Power = 0;
                 elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             }
-
 
             // Set power if button is pressed
             if(gamepad1.cross) {
@@ -160,6 +146,14 @@ public class TeleOp_4x4 extends LinearOpMode {
                 elevator2Power -= ELEVATOR_MOTOR2_POWER;
             }
 
+            // Makes motors have no resistance after clicking right bumper
+            if(gamepad1.right_bumper) {
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            } else {
+                elevatorMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                elevatorMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
 
             // Send calculated power to motors
             leftDriveFront.setPower(leftPower);
